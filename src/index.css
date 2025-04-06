@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --cta-gradient-from: theme('colors.emerald.600');
+    --cta-gradient-to: theme('colors.sky.600');
+    --cta-hover-from: theme('colors.emerald.500');
+    --cta-hover-to: theme('colors.sky.500');
+    --cta-text: theme('colors.white');
+    --cta-shadow-color: theme('colors.emerald.500 / 20%');
+  }
+
+  body {
+    @apply antialiased bg-black;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%238B9CB9' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+  }
+}
+
+@layer components {
+  .cta-button {
+    @apply relative px-8 py-4 rounded-full font-bold text-lg transition-all duration-500;
+  }
+
+  .cta-button::before {
+    @apply absolute -inset-1 bg-gradient-to-r from-[var(--cta-gradient-from)] to-[var(--cta-gradient-to)] 
+           rounded-full blur opacity-75 transition-all duration-500 animate-pulse-slow;
+    content: '';
+    z-index: -2;
+  }
+
+  .cta-button::after {
+    @apply absolute inset-0 bg-black rounded-full transition-colors duration-500;
+    content: '';
+    z-index: -1;
+  }
+
+  .cta-button:hover::before {
+    @apply opacity-100 from-[var(--cta-hover-from)] to-[var(--cta-hover-to)];
+  }
+
+  .cta-button:hover::after {
+    @apply bg-transparent;
+  }
+
+  .cta-button:hover {
+    @apply scale-102 shadow-lg shadow-[var(--cta-shadow-color)];
+  }
+
+  .cta-button-content {
+    @apply relative flex items-center gap-2 border border-emerald-500/20 px-8 py-4 rounded-full
+           transition-all duration-500 text-white;
+  }
+
+  .cta-button:hover .cta-button-content {
+    @apply border-emerald-500/50;
+  }
+
+  .cta-button:hover .cta-arrow {
+    @apply translate-x-1;
+  }
+
+  .scale-102 {
+    transform: scale(1.02);
+  }
+
+  @keyframes ctaSplash {
+    0% {
+      transform: scale(0);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+}
+
+@layer utilities {
+  .backdrop-blur {
+    backdrop-filter: blur(8px);
+  }
+
+  .glow {
+    box-shadow: 0 0 20px theme('colors.blue.500/0.3'),
+                0 0 40px theme('colors.blue.500/0.2');
+  }
+
+  .glow-text {
+    text-shadow: 0 0 10px theme('colors.blue.500/0.5');
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-500 to-purple-600 text-transparent bg-clip-text;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20;
+  }
+}
