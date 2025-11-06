@@ -1,52 +1,42 @@
-// netlify/functions/contact.js
 import { createClient } from '@supabase/supabase-js';
+import nodemailer from 'nodemailer';
 
-const supabaseUrl = 'https://yrpprpvmcxnwfuvhiupb.supabase.co'; 
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY; 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
-export const handler = async (event) => {
+export async function handler(event, context) {
   try {
-    if (event.httpMethod !== 'POST') {
-      return {
-        statusCode: 405,
-        body: JSON.stringify({ error: 'Method Not Allowed' }),
-      };
-    }
+    const { name, email, company, service, problem } = JSON.parse(event.body);
 
-    const data = JSON.parse(event.body);
-    const { name, email, company, service, problem } = data;
+    // Save to Supabase
+    await supabase.from('contacts').insert([
+      { name, email, company, service, problem }
+    ]);
 
-    if (!name || !email || !problem) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Missing required fields' }),
-      };
-    }
+    // Send email
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',  // If using Gmail
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    });
 
-    const { error } = await supabase
-      .from('contacts')
-      .insert([
-        {
-          name,
-          email,
-          message: problem,
-          company,
-          service,
-        },
-      ]);
+    await transporter.sendMail({
+      from: `"Website Contact" <${process.env.SMTP_USER}>`,
+      to: process.env.SMTP_USER,  // Your email to receive notifications
+      subject: `New Contact Form Submission from ${name}`,
+      text: `Name: ${name}\nEmail: ${email}\nCompany: ${company}\nService: ${service}\nProblem: ${problem}`
+    });
 
-    if (error) throw error;
+    return { statusCode: 200, body: 'Success' };
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'Message submitted successfully!' }),
-    };
-  } catch (err) {
-    console.error('Error:', err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Server error. Try again later.' }),
-    };
+  } catch (error) {
+    console.error(error);
+    return { statusCode: 500, body: 'Failed to send message' };
   }
-};
+}
